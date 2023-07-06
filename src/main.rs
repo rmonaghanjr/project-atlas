@@ -5,10 +5,13 @@ extern crate atmega_hal;
 extern crate embedded_hal;
 extern crate hd44780_driver;
 
+mod drivers;
+
 use core::borrow::Borrow;
 
 use atmega_hal::prelude::*;
 use atmega_hal::usart::*;
+use crate::drivers;
 
 #[panic_handler]
 fn panic(_info: &core::panic::PanicInfo) -> ! {
