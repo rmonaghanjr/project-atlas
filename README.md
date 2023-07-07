@@ -1,6 +1,11 @@
 # project-atlas
 My first dive into creating firmware for a board that previously did not function. I will be comitting here from time to time.
 
+## building
+The commands for building and flashing the code in this project are as follows:
+- `cargo build -Z build-std=core --target avr-atmega1284p.json --release`
+- `avrdude -p m1284p -c arduino -P /dev/tty.usbserial-14130 -b 57600 -U flash:w:target/avr-atmega1284p/release/project-atlas.elf`
+
 ## resources
 The resources I used to develop this project.
 
