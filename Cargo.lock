@@ -153,6 +153,7 @@ dependencies = [
  "avr-hal-generic 0.1.0 (git+https://github.com/Rahix/avr-hal)",
  "embedded-hal",
  "hd44780-driver",
+ "nb 0.1.3",
  "ufmt",
 ]
 

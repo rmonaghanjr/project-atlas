@@ -8,6 +8,7 @@ version = "0.1.0"
 embedded-hal = "0.2.3"
 ufmt = "0.1.0"
 avr-device = "0.5.1"
+nb = "0.1.2"
 
 [profile.dev]
 panic = "abort"
