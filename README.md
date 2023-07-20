@@ -3,8 +3,10 @@ My first dive into creating firmware for a board that previously did not functio
 
 ## building
 The commands for building and flashing the code in this project are as follows:
-- `tbd, rewriting in c`
-- `avrdude -p m1284p -c arduino -P /dev/tty.usbserial-14130 -b 57600 -U flash:w:<file>`
+- `make`
+- `make flash`*
+
+\* change serial port first!
 
 ## resources
 The resources I used to develop this project.
