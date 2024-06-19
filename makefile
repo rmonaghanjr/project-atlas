@@ -4,14 +4,13 @@ EXECUTABLE := main
 COMPILER=avr-gcc
 OBJ_COPY=avr-objcopy
 MMCU=atmega1284p
-SERIAL_PORT=/dev/tty.usbserial-14120
+SERIAL_PORT=/dev/tty.usbserial-1110
 
 # compiler config
-COMPILER := avr-gcc 
 FLAGS=-Wall -Os -DF_CPU=16000000UL -mmcu=$(MMCU) -c
 
 # source files
-FILES := main.c
+FILES := main.c led.c commands.c
 OBJECTS := $(addprefix $(BUILD_DIR)/,$(patsubst %.c,%.o,$(FILES)))
 
 .PHONY: $(EXECUTABLE)
