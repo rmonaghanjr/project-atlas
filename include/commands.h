@@ -8,7 +8,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#define TOTAL_COMMAND_COUNT 1
+#define TOTAL_COMMAND_COUNT 2
 
 typedef enum {
     COMMAND_ERROR_NONE,
@@ -21,6 +21,7 @@ typedef struct {
 } base_command;
 
 command_err_t onboard_led_command_execute(char* command);
+command_err_t onboard_spidev_action_execute(char* command);
 
 char* get_next_argument(char* command);
 

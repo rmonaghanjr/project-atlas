@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 #include "../include/commands.h"
-#include "../include/led.h"
+#include "../include/drivers/led.h"
 
 #define MAX_COMMAND_SIZE 100
 
@@ -28,6 +28,18 @@ command_err_t onboard_led_command_execute(char* command) {
         else if (state == OFF) printf("led is off\n");
         return COMMAND_ERROR_NONE;
     }
+}
+
+command_err_t onboard_spidev_action_execute(char* command) {
+    char* arg = get_next_argument(command);
+
+    if (strcasecmp(arg, "WRITE") == 0) { 
+
+    } else if (strcasecmp(arg, "READ") == 0) {
+
+    } else if (strcasecmp(arg, "INIT") == 0) {
+        
+    } 
 }
 
 char* get_next_argument(char* command) {

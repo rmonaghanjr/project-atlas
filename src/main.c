@@ -14,8 +14,10 @@
 #include <string.h>
 #include <stddef.h>
 
-#include "../include/led.h"
+#include "../include/drivers/led.h"
 #include "../include/commands.h"
+
+#define MAIN_LOOP 1
 
 #define MOSI PB5
 #define SCK PB7
@@ -107,7 +109,7 @@ int main() {
     int nCommandCount = 0;
     base_command** command_arr = create_all_commands(&nCommandCount);
 
-    while (1) {
+    while (MAIN_LOOP) {
         show_prompt(command, 0);
         int i = 0;
         char input = '\0';
@@ -144,15 +146,19 @@ int main() {
 
         while (command[c] != ':' || command[c] == '\0' || command[c] == 0x0d) c++;
         strncpy(commandBuf, command, c);
-        
+
+        char found_command = 0;
         for (int i = 0; i < nCommandCount; i++) {
             base_command* command_object = (base_command*) command_arr[i];
             if (strcasecmp(commandBuf, command_object->name) == 0) {
-                printf("%c\n", *(command + c));
                 command_err_t error = command_object->execute(command + c);
-                continue;
+                found_command = 1;
+                break;
             }
         }
+
+        // continue mainloop if a command was found, else fallback to other commands previously implemented
+        if (found_command) continue;
 
         // command handler
         if (strcmp(command, "shutdown") == 0) {
