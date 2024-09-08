@@ -34,7 +34,7 @@ uint8_t spi_transfer(uint8_t data) {
 
     set_state(ON);
     while(!(SPSR & (1 << SPIF)));
-    printf("spi_transfer(%d) == %d\r\n", data, SPDR);
+    printf("spidev: spi_transfer(0x%02x) == 0x%02x\r\n", data, SPDR);
     set_state(OFF);
 
     return SPDR;

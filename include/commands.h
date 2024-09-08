@@ -13,7 +13,8 @@
 typedef enum {
     COMMAND_ERROR_NONE,
     COMMAND_ERROR_UNIMPLEMENTED,
-    COMMAND_ERROR_BAD_ARG
+    COMMAND_ERROR_BAD_ARG,
+    COMMAND_ERROR_DEVICE_PROBLEM
 } command_err_t;
 
 typedef struct {

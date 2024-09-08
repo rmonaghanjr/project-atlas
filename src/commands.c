@@ -1,6 +1,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <util/delay.h>
 
 #include "../include/commands.h"
 #include "../include/drivers/led.h"
@@ -55,16 +56,28 @@ command_err_t onboard_spidev_action_execute(char* command) {
 
 command_err_t sdcard_command_execute(char* command) {
     char* arg = get_next_argument(command);
-    uint8_t res1;
+    R1 res1;
+    R7 res7;
+    uint8_t attempts = 0;
 
     if (strcasecmp(arg, "INIT") == 0) { 
-        spi_init();
+        sdcard_err_t err = sdcard_init();
+        if (err != SDCARD_READY) {
+            printf("sdcard: init: got error %d", err);
+            return COMMAND_ERROR_DEVICE_PROBLEM;
+        }
+        printf("sdcard: ready to go!\r\n");
+        return COMMAND_ERROR_NONE;
+    } else if (strcasecmp(arg, "CHECK") == 0) {
+        R7 res = sdcard_send_if_cond();
 
-        sdcard_powerup();
+        print_r7(res);
 
-        res1 = sdcard_enter_idle_state();
+        return COMMAND_ERROR_NONE;
+    } else if (strcasecmp(arg, "READ_OCR") == 0) {
+        R7 res = scdard_read_ocr();
 
-        printf("got back '%d' as res1 from sdcard...\r\n", res1);
+        print_r3(res);
 
         return COMMAND_ERROR_NONE;
     } else {
