@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "led.h": "c",
-        "commands.h": "c"
+        "commands.h": "c",
+        "spidev.h": "c"
     }
 }

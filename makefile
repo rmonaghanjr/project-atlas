@@ -10,7 +10,8 @@ SERIAL_PORT=/dev/tty.usbserial-1110
 FLAGS=-Wall -Os -DF_CPU=16000000UL -mmcu=$(MMCU) -c
 
 # source files
-FILES := main.c led.c commands.c
+DRIVERS := drivers/led.c drivers/spidev.c drivers/sdcard.c
+FILES := main.c commands.c $(DRIVERS)
 OBJECTS := $(addprefix $(BUILD_DIR)/,$(patsubst %.c,%.o,$(FILES)))
 
 .PHONY: $(EXECUTABLE)

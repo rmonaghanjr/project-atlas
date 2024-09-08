@@ -19,13 +19,6 @@
 
 #define MAIN_LOOP 1
 
-#define MOSI PB5
-#define SCK PB7
-#define SS PB4
-#define MISO PB6
-
-#define TEST(n,b) (((n)&_BV(b))!=0)
-
 #undef FDEV_SETUP_STREAM
 #define FDEV_SETUP_STREAM(p, g, f) \
     {                              \
@@ -64,28 +57,6 @@ char uart_getchar(FILE *stream) {
     return UDR0;
 }
 
-void spi_init() {
-    DDRB |= (1<<MOSI)|(1<<SCK)|(1<<SS);	/* Make MOSI, SCK, SS 
-						as Output pin */
-	DDRB &= ~(1<<MISO);			/* Make MISO pin 
-						as input pin */
-	PORTB |= (1<<SS);			/* Make high on SS pin */
-	SPCR = (1<<SPE)|(1<<MSTR)|(1<<SPR0);	/* Enable SPI in master mode
-						with Fosc/16 */
-	SPSR &= ~(1<<SPI2X);	
-}
-
-char spi_rec() {
-    SPDR = 0xFF;
-	while(!(SPSR & (1<<SPIF)));	/* Wait till reception complete */
-	return (SPDR);
-}
-
-void spi_send(char data) {
-	SPDR = data;			/* Write data to SPI data register */
-	while(!(SPSR & (1<<SPIF)));	/* Wait till transmission complete */
-  }
-
 void show_prompt(char* command, char reset) {
     if (reset) {
         printf("\r                                     ");
@@ -105,7 +76,7 @@ int main() {
 
     // spi_init();
 
-    char command[MAX_COMMAND_SIZE];
+    char command[MAX_COMMAND_SIZE] = {0};
     int nCommandCount = 0;
     base_command** command_arr = create_all_commands(&nCommandCount);
 
@@ -158,7 +129,10 @@ int main() {
         }
 
         // continue mainloop if a command was found, else fallback to other commands previously implemented
-        if (found_command) continue;
+        if (found_command) {
+            memset(command, 0, sizeof(command));
+            continue;
+        };
 
         // command handler
         if (strcmp(command, "shutdown") == 0) {
@@ -173,12 +147,6 @@ int main() {
             printf("  led status\r\n");
             printf("  ping\r\n");
             printf("  shutdown\r\n");
-        } else if (strcmp(command, "spi init") == 0) {
-            spi_init();
-        } else if (strcmp(command, "spi write") == 0) {
-            spi_send('r');
-        } else if (strcmp(command, "spi read") == 0) {
-            printf("0x%x\n", spi_rec());
         } else {
             printf("'%s' is an unknown command\r\n", command);
         }
