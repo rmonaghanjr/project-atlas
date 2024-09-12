@@ -4,7 +4,7 @@ EXECUTABLE := main
 COMPILER=avr-gcc
 OBJ_COPY=avr-objcopy
 MMCU=atmega1284p
-SERIAL_PORT=/dev/tty.usbserial-1110
+SERIAL_PORT=/dev/$(shell ls /dev | grep tty.usb)
 
 DEBUG=0
 # compiler config
