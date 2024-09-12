@@ -57,16 +57,21 @@ char uart_getchar(FILE *stream) {
     return UDR0;
 }
 
-void show_prompt(char* command, char reset) {
+void show_prompt(char* command, char reset, command_err_t num) {
     if (reset) {
         printf("\r                                     ");
     }
-    printf("\r> %s", command);
+    printf("\r0x%02x> %s", num, command);
 }
 
 int main() {
     FILE uart_output = FDEV_SETUP_STREAM((int (*)(char, FILE*)) uart_putchar, NULL, _FDEV_SETUP_WRITE);
     FILE uart_input = FDEV_SETUP_STREAM(NULL, (int (*)(FILE*)) uart_getchar, _FDEV_SETUP_READ);
+    char command[MAX_COMMAND_SIZE] = {0};
+    char prev_command[MAX_COMMAND_SIZE] = {0};
+    int nCommandCount = 0;
+    base_command** command_arr = create_all_commands(&nCommandCount);
+    command_err_t prev_err = COMMAND_ERROR_NONE;
 
     DDRA |= (1 << PA4); // enable onboard LED on porta, direction output
 
@@ -74,27 +79,32 @@ int main() {
     stdout = &uart_output;
     stdin  = &uart_input;
 
-    // spi_init();
-
-    char command[MAX_COMMAND_SIZE] = {0};
-    int nCommandCount = 0;
-    base_command** command_arr = create_all_commands(&nCommandCount);
-
     while (MAIN_LOOP) {
-        show_prompt(command, 0);
+        show_prompt(command, 0, prev_err);
         int i = 0;
         char input = '\0';
 
         do {
             input = getchar();
-            if (input == 0xd) break;
-            if (input == 0x7f) {
+            if (input == 0x0d) break;
+            if (input == 0x1b) {
+                memset(command, 0, MAX_COMMAND_SIZE);
+                memcpy(command, prev_command, MAX_COMMAND_SIZE);
+                show_prompt(command, 1, prev_err);
+
+                i = strlen(command);
+                getchar();
+                getchar();
+                continue;
+            }
+
+            if (input == 0x7f || input == 0x08) {
                 if (i <= 0) {
-                    show_prompt(command, 0);
+                    show_prompt(command, 0, prev_err);
                     continue;
                 }
                 command[--i] = '\0';
-                show_prompt(command, 1);
+                show_prompt(command, 1, prev_err);
                 continue;
             }
 
@@ -102,13 +112,13 @@ int main() {
                 printf("\r\nbuffer overflow\r\n");
                 memset(command, 0, MAX_COMMAND_SIZE);
                 i = 0;
-                show_prompt(command, 0);
+                show_prompt(command, 0, prev_err);
                 continue;
             }
 
             command[i++] = input;
-            show_prompt(command, 0);
-        } while(input != 0xd);
+            show_prompt(command, 0, prev_err);
+        } while(input != 0x0d);
         printf("\r\n");
 
         int c = 0;
@@ -124,29 +134,16 @@ int main() {
             if (strcasecmp(commandBuf, command_object->name) == 0) {
                 command_err_t error = command_object->execute(command + c);
                 found_command = 1;
+                prev_err = error;
                 break;
             }
         }
 
         // continue mainloop if a command was found, else fallback to other commands previously implemented
         if (found_command) {
-            memset(command, 0, sizeof(command));
+            memcpy(prev_command, command, MAX_COMMAND_SIZE);
+            memset(command, 0, MAX_COMMAND_SIZE);
             continue;
-        };
-
-        // command handler
-        if (strcmp(command, "shutdown") == 0) {
-            printf("shutting down\r\n");
-        } else if (strcmp(command, "ping") == 0) {
-            printf("pong\r\n");
-        } else if (strcmp(command, "help") == 0) {
-            printf("available commands:\r\n");
-            printf("  led on\r\n");
-            printf("  led off\r\n");
-            printf("  led next\r\n");
-            printf("  led status\r\n");
-            printf("  ping\r\n");
-            printf("  shutdown\r\n");
         } else {
             printf("'%s' is an unknown command\r\n", command);
         }

@@ -24,6 +24,17 @@
 #define ACMD41_ARG  0x40000000
 #define ACMD41_CRC  0x00
 
+// read data block
+#define CMD17                   17
+#define CMD17_CRC               0x00
+#define SD_MAX_READ_ATTEMPTS    1563
+
+// write data block
+#define CMD24                   24
+#define CMD24_ARG               0x00
+#define CMD24_CRC               0x00
+#define SD_MAX_WRITE_ATTEMPTS   3907
+
 // RESPONSES
 // R1
 #define PARAM_ERROR(X)      X & 0b01000000
@@ -56,7 +67,22 @@
 #define VDD_3435(X)         X & 0b01000000
 #define VDD_3536(X)         X & 0b10000000
 
+#define SD_TOKEN_OOR(X)     X & 0b00001000
+#define SD_TOKEN_CECC(X)    X & 0b00000100
+#define SD_TOKEN_CC(X)      X & 0b00000010
+#define SD_TOKEN_ERROR(X)   X & 0b00000001
 
+#define SD_IN_IDLE_STATE    0x01
+#define SD_READY            0x00
+#define SD_R1_NO_ERROR(X)   X < 0x02
+
+#define SD_START_TOKEN          0xfe
+#define SD_ERROR_TOKEN          0x00
+#define SD_DATA_ACCEPTED        0x05
+#define SD_DATA_REJECTED_CRC    0x0B
+#define SD_DATA_REJECTED_WRITE  0x0D
+
+#define SD_BLOCK_LEN            512
 
 sdcard_err_t sdcard_init() {
     R1 res1;
@@ -172,7 +198,7 @@ void print_r1(R1 result) {
     }
 
     if(res == 0) { 
-        printf("card ready\r\n");
+        printf("sdcard: card ready\r\n");
         return;
     }
 
@@ -244,6 +270,24 @@ void print_r7(R7 result) {
         printf("NOT DEFINED\r\n");
 
     printf("sdcard: echo: 0x%08x\r\n", res[4]);
+}
+
+void print_sdcard_data_token(uint8_t token) {
+    if (SD_TOKEN_OOR(token)) {
+        printf("sdcard: data out of range\r\n");
+    }
+
+    if (SD_TOKEN_CECC(token)) {
+        printf("sdcard: card ecc failed\r\n");
+    }
+
+    if (SD_TOKEN_CC(token)) {
+        printf("sdcard: cc error\r\n");
+    }
+
+    if (SD_TOKEN_ERROR(token)) {
+        printf("sdcard: error\r\n");
+    }
 }
 
 R1 sdcard_enter_idle_state() {
@@ -333,6 +377,128 @@ R1 sdcard_send_op_cond() {
     // read response
     res = sdcard_readres1();
 
+    spi_transfer(0xff);
+    SPI_SLAVE_DESELECTED;
+    spi_transfer(0xff);
+
+    return res;
+}
+
+/*******************************************************************************
+ Read single 512 byte block
+ token = 0xFE - Successful read
+ token = 0x0X - Data error
+ token = 0xFF - Timeout
+*******************************************************************************/
+R1 sdcard_read_single_block(uint32_t addr, uint8_t *buf, uint8_t *token) {
+    R1 res1;
+    uint8_t read;
+    uint16_t read_attempts;
+
+    // set token to none
+    *token = 0xff;
+
+    spi_transfer(0xff);
+    SPI_SLAVE_SELECTED;
+    spi_transfer(0xff);
+
+    // send CMD17
+    sdcard_command(CMD17, addr, CMD17_CRC);
+
+    // read R1
+    res1 = sdcard_readres1();
+
+    // get response from card
+    if (res1.value != 0xff) {
+        // wait for a response token (timeout = 100ms)
+        read_attempts = 0;
+        while (++read_attempts != SD_MAX_READ_ATTEMPTS) {
+            if ((read = spi_transfer(0xff)) != 0xff) break;
+        } 
+
+        // if response token is 0xFE
+        if (read == 0xfe) {
+            // 512 byte block
+            for(uint16_t i = 0; i < 512; i++) {
+                *buf++ = spi_transfer(0xff);
+            }
+
+            // read 16-bit CRC
+            spi_transfer(0xff);
+            spi_transfer(0xff);
+        }
+
+        // set token to card response
+        *token = read;
+    }
+
+    spi_transfer(0xff);
+    SPI_SLAVE_DESELECTED;
+    spi_transfer(0xFF);
+
+    return res1;
+}
+
+/*******************************************************************************
+ Write single 512 byte block
+ token = 0x00 - busy timeout
+ token = 0x05 - data accepted
+ token = 0xFF - response timeout
+*******************************************************************************/
+R1 sdcard_write_single_block(uint32_t addr, uint8_t *buf, uint8_t *token) {
+    uint8_t attempts, read;
+    R1 res;
+
+    // set token to none
+    *token = 0xFF;
+
+    // assert chip select
+    spi_transfer(0xFF);
+    SPI_SLAVE_SELECTED;
+    spi_transfer(0xFF);
+
+    // send CMD24
+    sdcard_command(CMD24, addr, CMD24_CRC);
+
+    // read response
+    res = sdcard_readres1();
+
+    // if no error
+    if (res.bytes[0] == SD_READY) {
+        // send start token
+        spi_transfer(SD_START_TOKEN);
+
+        // write buffer to card
+        for (uint16_t i = 0; i < SD_BLOCK_LEN; i++) {
+            spi_transfer(buf[i]);
+        }
+
+        // wait for a response (timeout = 250ms)
+        attempts = 0;
+        while(++attempts != SD_MAX_WRITE_ATTEMPTS) {
+            if ((read = spi_transfer(0xff)) != 0xff) {
+                *token = 0xFF; 
+                break; 
+            }
+        }
+
+        // if data accepted
+        if((read & 0x1f) == 0x05) {
+            // set token to data accepted
+            *token = 0x05;
+
+            // wait for write to finish (timeout = 250ms)
+            attempts = 0;
+            while(spi_transfer(0xff) == 0x00) {
+                if (++attempts == SD_MAX_WRITE_ATTEMPTS) {
+                    *token = 0x00;
+                    break;
+                }
+            }
+        }
+    }
+
+    // deassert chip select
     spi_transfer(0xff);
     SPI_SLAVE_DESELECTED;
     spi_transfer(0xff);

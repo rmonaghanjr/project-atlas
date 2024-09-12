@@ -35,8 +35,12 @@ void print_r1(R1 result);
 void print_r3(R7 result);
 void print_r7(R7 result);
 
+void print_sdcard_data_token(uint8_t token);
+
 R1 sdcard_enter_idle_state();
 R7 sdcard_send_if_cond();
 R7 scdard_read_ocr();
 R1 sdcard_send_app_cmd();
 R1 sdcard_send_op_cond();
+R1 sdcard_read_single_block(uint32_t addr, uint8_t *buf, uint8_t *token);
+R1 sdcard_write_single_block(uint32_t addr, uint8_t *buf, uint8_t *token);

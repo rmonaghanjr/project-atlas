@@ -24,7 +24,7 @@ void spi_transmit_byte(uint8_t data) {
 uint8_t spi_recieve_byte() {
     SPDR = 0xff;
 
-    while(!(SPSR & (1 << SPIF)));
+    while (!(SPSR & (1 << SPIF)));
 
     return SPDR;
 }
@@ -34,7 +34,9 @@ uint8_t spi_transfer(uint8_t data) {
 
     set_state(ON);
     while(!(SPSR & (1 << SPIF)));
+#ifdef DEBUG
     printf("spidev: spi_transfer(0x%02x) == 0x%02x\r\n", data, SPDR);
+#endif
     set_state(OFF);
 
     return SPDR;
@@ -46,7 +48,7 @@ uint8_t spi_test() {
     uint8_t value = 0xfa; // randomly chosen value for demo purposes
     SPI_SLAVE_SELECTED;
     SPDR = value;                  // initiates transfer
-    while(!(SPSR & (1 << SPIF))); // wait for SPIF bit to be set
+    while (!(SPSR & (1 << SPIF))); // wait for SPIF bit to be set
     SPI_SLAVE_DESELECTED;
     return SPDR;
 }

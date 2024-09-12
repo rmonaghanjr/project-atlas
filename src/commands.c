@@ -56,9 +56,6 @@ command_err_t onboard_spidev_action_execute(char* command) {
 
 command_err_t sdcard_command_execute(char* command) {
     char* arg = get_next_argument(command);
-    R1 res1;
-    R7 res7;
-    uint8_t attempts = 0;
 
     if (strcasecmp(arg, "INIT") == 0) { 
         sdcard_err_t err = sdcard_init();
@@ -66,6 +63,7 @@ command_err_t sdcard_command_execute(char* command) {
             printf("sdcard: init: got error %d", err);
             return COMMAND_ERROR_DEVICE_PROBLEM;
         }
+
         printf("sdcard: ready to go!\r\n");
         return COMMAND_ERROR_NONE;
     } else if (strcasecmp(arg, "CHECK") == 0) {
@@ -78,6 +76,28 @@ command_err_t sdcard_command_execute(char* command) {
         R7 res = scdard_read_ocr();
 
         print_r3(res);
+
+        return COMMAND_ERROR_NONE;
+    } else if (strcasecmp(arg, "READ_BLOCK") == 0) {
+        uint8_t buf[512];
+        uint8_t token = 0;
+        R1 res1 = sdcard_read_single_block(0x00000000, (uint8_t*) &buf, &token);
+
+        print_r1(res1);
+
+        if (!(token & 0xf0)) {
+            print_sdcard_data_token(token);
+        } else if (token == 0xff) {
+            printf("sdcard: timeout\r\n");
+        }
+
+        for (int i = 0; i < 512; i++) {
+            if (i % 16 == 0) {
+                printf("\r\n");
+            }
+            printf("%02x ", buf[i]);
+        }
+        printf("\r\n");
 
         return COMMAND_ERROR_NONE;
     } else {

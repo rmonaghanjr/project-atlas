@@ -6,8 +6,9 @@ OBJ_COPY=avr-objcopy
 MMCU=atmega1284p
 SERIAL_PORT=/dev/tty.usbserial-1110
 
+DEBUG=0
 # compiler config
-FLAGS=-Wall -Os -DF_CPU=16000000UL -mmcu=$(MMCU) -c
+FLAGS=-Wall -Os -DF_CPU=16000000UL -DDEBUG=$(DEBUG) -mmcu=$(MMCU) -c
 
 # source files
 DRIVERS := drivers/led.c drivers/spidev.c drivers/sdcard.c
@@ -35,7 +36,8 @@ $(BUILD_DIR)/$(EXECUTABLE): $(OBJECTS)
 	$(COMPILER) -mmcu=$(MMCU) $^ -o ./$(BUILD_DIR)/$(EXECUTABLE)
 	@echo "building elf file..."
 	$(OBJ_COPY) -O elf32-avr -R .eeprom ./$(BUILD_DIR)/$(EXECUTABLE) ./$(BUILD_DIR)/$(EXECUTABLE).elf
-	@echo "done."
+	@echo "done. info:	"
+	@avr-size ./build/main.elf
 
 flash:
 	@echo "flashing using port $(SERIAL_PORT)..."
@@ -43,9 +45,19 @@ flash:
 	@echo "done."
 
 new:
-	make clean
-	make
+	@make clean
+	@make
+
+all: 
+	@make clean 
+	@make
+
+debug:
+	@make clean 
+	@make DEBUG=1
 
 clean:
-	rm -rf build
-	mkdir build
+	@echo "cleaning..."
+	@rm -rf build
+	@mkdir build
+	@echo "done."
