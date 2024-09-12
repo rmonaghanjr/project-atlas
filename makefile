@@ -12,7 +12,8 @@ FLAGS=-Wall -Os -DF_CPU=16000000UL -DDEBUG=$(DEBUG) -mmcu=$(MMCU) -c
 
 # source files
 DRIVERS := drivers/led.c drivers/spidev.c drivers/sdcard.c
-FILES := main.c commands.c $(DRIVERS)
+FILESYSTEM := filesystem/diskio.c filesystem/pff.c
+FILES := main.c commands.c $(DRIVERS) $(FILESYSTEM)
 OBJECTS := $(addprefix $(BUILD_DIR)/,$(patsubst %.c,%.o,$(FILES)))
 
 .PHONY: $(EXECUTABLE)
