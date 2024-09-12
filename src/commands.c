@@ -56,6 +56,7 @@ command_err_t onboard_spidev_action_execute(char* command) {
 
 command_err_t sdcard_command_execute(char* command) {
     char* arg = get_next_argument(command);
+    char* data = get_next_argument(command);
 
     if (strcasecmp(arg, "INIT") == 0) { 
         sdcard_err_t err = sdcard_init();
@@ -100,6 +101,11 @@ command_err_t sdcard_command_execute(char* command) {
         printf("\r\n");
 
         return COMMAND_ERROR_NONE;
+    } else if (strcasecmp(arg, "WRITE_BLOCK") == 0) {
+
+        printf("data:%s\r\n", data);
+
+        return COMMAND_ERROR_UNIMPLEMENTED;
     } else {
         return COMMAND_ERROR_BAD_ARG;
     }
@@ -126,6 +132,11 @@ char* get_next_argument(char* command) {
     return buf;
 }
 
+
+command_err_t shutdown_processor(char* command) {
+    return COMMAND_ERROR_PANIC;
+}
+
 base_command** create_all_commands(int* num) {
     base_command** all_commands = (base_command**) malloc(sizeof(base_command*) * TOTAL_COMMAND_COUNT);
     int index = 0;
@@ -143,11 +154,16 @@ base_command** create_all_commands(int* num) {
     sdcard_command_obj->name = "SDCARD";
     sdcard_command_obj->execute = &sdcard_command_execute;
 
+    base_command* shutdown_command_obj = (base_command*) malloc(sizeof(base_command));
+    shutdown_command_obj->name = "SHUTDOWN";
+    shutdown_command_obj->execute = &shutdown_processor;
+
 
     // add all commands
     all_commands[index++] = (base_command*) led_command_obj;
     all_commands[index++] = (base_command*) spi_command_obj;
     all_commands[index++] = (base_command*) sdcard_command_obj;
+    all_commands[index++] = (base_command*) shutdown_command_obj;
 
     *num = index;
     return all_commands;

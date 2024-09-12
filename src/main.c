@@ -143,6 +143,14 @@ int main() {
         if (found_command) {
             memcpy(prev_command, command, MAX_COMMAND_SIZE);
             memset(command, 0, MAX_COMMAND_SIZE);
+
+            if (prev_err == COMMAND_ERROR_PANIC) {
+                destroy_all_commands(command_arr, TOTAL_COMMAND_COUNT);
+                printf("freed commands, exiting...\r\n");
+                // TODO: investigate how to put processor into reset?
+                break;
+            }
+
             continue;
         } else {
             printf("'%s' is an unknown command\r\n", command);
