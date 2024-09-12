@@ -35,8 +35,8 @@
 /                     Removed some code pages actually not valid.
 /----------------------------------------------------------------------------*/
 
-#include "pff.h"		/* Petit FatFs configurations and declarations */
-#include "diskio.h"		/* Declarations of low level disk I/O functions */
+#include "../../include/filesystem/pff.h"		/* Petit FatFs configurations and declarations */
+#include "../../include/filesystem/diskio.h"		/* Declarations of low level disk I/O functions */
 
 
 
