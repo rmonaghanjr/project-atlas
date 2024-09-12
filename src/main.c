@@ -125,7 +125,12 @@ int main() {
         char commandBuf[MAX_COMMAND_SIZE];
         memset(commandBuf, 0, MAX_COMMAND_SIZE);
 
-        while (command[c] != ':' || command[c] == '\0' || command[c] == 0x0d) c++;
+        while (command[c] != ':' && command[c] != '\0' && command[c] != 0x0d) {
+#if DEBUG
+            printf("command[c] is '0x%02x'\r\n", command[c]);
+#endif
+            c++;
+        }
         strncpy(commandBuf, command, c);
 
         char found_command = 0;

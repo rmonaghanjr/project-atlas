@@ -34,7 +34,7 @@ uint8_t spi_transfer(uint8_t data) {
 
     led_set_state(LED_STATE_ON);
     while(!(SPSR & (1 << SPIF)));
-#ifdef DEBUG
+#if DEBUG
     printf("spidev: spi_transfer(0x%02x) == 0x%02x\r\n", data, SPDR);
 #endif
     led_set_state(LED_STATE_OFF);
