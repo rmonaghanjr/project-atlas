@@ -40,7 +40,7 @@ $(BUILD_DIR)/$(EXECUTABLE): $(OBJECTS)
 	@avr-size ./build/main.elf
 
 flash:
-	@echo "flashing using port $(SERIAL_PORT)..."
+	@echo "flashing $(MMCU) using port $(SERIAL_PORT)..."
 	avrdude -p m1284p -c arduino -P $(SERIAL_PORT) -b 57600 -U flash:w:./$(BUILD_DIR)/$(EXECUTABLE).elf
 	@echo "done."
 

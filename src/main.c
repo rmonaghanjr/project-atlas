@@ -146,6 +146,7 @@ int main() {
             continue;
         } else {
             printf("'%s' is an unknown command\r\n", command);
+            prev_err = COMMAND_ERROR_NOT_FOUND;
         }
 
         memset(command, 0, sizeof(command));

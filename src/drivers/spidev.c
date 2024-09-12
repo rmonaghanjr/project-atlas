@@ -32,12 +32,12 @@ uint8_t spi_recieve_byte() {
 uint8_t spi_transfer(uint8_t data) {
     SPDR = data;
 
-    set_state(ON);
+    led_set_state(LED_STATE_ON);
     while(!(SPSR & (1 << SPIF)));
 #ifdef DEBUG
     printf("spidev: spi_transfer(0x%02x) == 0x%02x\r\n", data, SPDR);
 #endif
-    set_state(OFF);
+    led_set_state(LED_STATE_OFF);
 
     return SPDR;
 }

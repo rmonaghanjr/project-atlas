@@ -14,21 +14,21 @@ command_err_t onboard_led_command_execute(char* command) {
     char* arg = get_next_argument(command);
 
     if (strcasecmp(arg, "ON") == 0) {
-        set_state(ON);
+        led_set_state(LED_STATE_ON);
         printf("done\n");
         return COMMAND_ERROR_NONE;
     } else if (strcasecmp(arg, "OFF") == 0) {
-        set_state(OFF);
+        led_set_state(LED_STATE_OFF);
         printf("done\n");
         return COMMAND_ERROR_NONE;
     } else if (strcasecmp(arg, "TOGGLE") == 0) {
-        set_state(TOGGLE);
+        led_set_state(LED_STATE_TOGGLE);
         printf("done\n");
         return COMMAND_ERROR_NONE;
     } else {
-        int state = get_state();
-        if (state == ON) printf("led is on\n");
-        else if (state == OFF) printf("led is off\n");
+        int state = led_get_state();
+        if (state == LED_STATE_ON) printf("led is on\n");
+        else if (state == LED_STATE_OFF) printf("led is off\n");
         return COMMAND_ERROR_NONE;
     }
 }

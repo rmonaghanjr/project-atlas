@@ -475,7 +475,7 @@ R1 sdcard_write_single_block(uint32_t addr, uint8_t *buf, uint8_t *token) {
 
         // wait for a response (timeout = 250ms)
         attempts = 0;
-        while(++attempts != SD_MAX_WRITE_ATTEMPTS) {
+        while (++attempts != SD_MAX_WRITE_ATTEMPTS) {
             if ((read = spi_transfer(0xff)) != 0xff) {
                 *token = 0xFF; 
                 break; 
@@ -483,13 +483,13 @@ R1 sdcard_write_single_block(uint32_t addr, uint8_t *buf, uint8_t *token) {
         }
 
         // if data accepted
-        if((read & 0x1f) == 0x05) {
+        if ((read & 0x1f) == 0x05) {
             // set token to data accepted
             *token = 0x05;
 
             // wait for write to finish (timeout = 250ms)
             attempts = 0;
-            while(spi_transfer(0xff) == 0x00) {
+            while (spi_transfer(0xff) == 0x00) {
                 if (++attempts == SD_MAX_WRITE_ATTEMPTS) {
                     *token = 0x00;
                     break;

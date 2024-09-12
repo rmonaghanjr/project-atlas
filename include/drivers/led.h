@@ -5,11 +5,11 @@
 #include <avr/io.h>
 
 typedef enum {
-    OFF,
-    ON,
-    TOGGLE,
-    UNKNOWN
+    LED_STATE_OFF,
+    LED_STATE_ON,
+    LED_STATE_TOGGLE,
+    LED_STATE_UNKNOWN
 } led_state_t;
 
-led_state_t get_state();
-void set_state(led_state_t state);
+led_state_t led_get_state();
+void led_set_state(led_state_t state);
