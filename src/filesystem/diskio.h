@@ -1,6 +1,9 @@
 /*-----------------------------------------------------------------------
 /  PFF - Low level disk interface modlue include file    (C)ChaN, 2014
 /-----------------------------------------------------------------------*/
+#ifndef __AVR_ATmega1284P__
+#define __AVR_ATmega1284P__
+#endif
 
 #ifndef _DISKIO_DEFINED
 #define _DISKIO_DEFINED

@@ -14,6 +14,10 @@
 /
 /----------------------------------------------------------------------------*/
 
+#ifndef __AVR_ATmega1284P__
+#define __AVR_ATmega1284P__
+#endif
+
 #ifndef PF_DEFINED
 #define PF_DEFINED	8088	/* Revision ID */
 

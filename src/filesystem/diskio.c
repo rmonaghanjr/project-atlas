@@ -1,3 +1,5 @@
+
+
 /*-----------------------------------------------------------------------*/
 /* Low level disk I/O module skeleton for Petit FatFs (C)ChaN, 2014      */
 /*-----------------------------------------------------------------------*/
@@ -14,6 +16,8 @@ DSTATUS disk_initialize (void)
 	DSTATUS stat;
 
 	// Put your code here
+	
+	// TODO: use sdcard initialization in this block, need to wait until i can do testing
 
 	return stat;
 }
@@ -35,6 +39,8 @@ DRESULT disk_readp (
 
 	// Put your code here
 
+	// TODO: use sdcard_read_block or create modified function header to better fit the need
+
 	return res;
 }
 
@@ -51,6 +57,8 @@ DRESULT disk_writep (
 {
 	DRESULT res;
 
+	// TODO: figure out what this code needs to do, 
+	//       i don't think theres a need for an initiate or finalize block
 
 	if (!buff) {
 		if (sc) {

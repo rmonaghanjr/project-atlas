@@ -1,6 +1,9 @@
 /*---------------------------------------------------------------------------/
 /  Petit FatFs - Configuration file
 /---------------------------------------------------------------------------*/
+#ifndef __AVR_ATmega1284P__
+#define __AVR_ATmega1284P__
+#endif
 
 #ifndef PFCONF_DEF
 #define PFCONF_DEF 8088	/* Revision ID */
